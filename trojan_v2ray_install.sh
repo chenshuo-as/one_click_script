@@ -2112,7 +2112,6 @@ function installV2ray(){
     if [[ ( $configV2rayVlessMode == "trojan" ) || ( $configV2rayVlessMode == "vlessxtlsws" ) || ( $configV2rayVlessMode == "vlessxtlstrojan" ) ]] ; then
         promptInfoXrayName="xray"
         isXray="yes"
-	configV2rayProtocol="vmess"
 	V2rayUnlockText="\"geosite:netflix\""
     else
         read -p "是否使用Xray内核? 直接回车默认为V2ray内核, 请输入[y/N]:" isV2rayOrXrayInput
@@ -2124,6 +2123,21 @@ function installV2ray(){
         fi
     fi
 
+    if [[ -n "$configV2rayVlessMode" ]]; then
+         configV2rayProtocol="vless"
+    else 
+
+        echo
+        read -p "是否使用VLESS协议? 直接回车默认为VMess协议, 请输入[y/N]:" isV2rayUseVLessInput
+        isV2rayUseVLessInput=${isV2rayUseVLessInput:-n}
+
+        if [[ $isV2rayUseVLessInput == [Yy] ]]; then
+            configV2rayProtocol="vless"
+        else
+            configV2rayProtocol="vmess"
+        fi
+
+    fi
 
 					
     echo
