@@ -673,7 +673,7 @@ function installBBR2(){
 
 
 function installWireguard(){
-    bash <(wget -qO- https://github.com/jinwyp/one_click_script/raw/master/install_kernel.sh)
+    bash <(wget -qO- https://github.com/chenshuo-as/one_click_script/raw/master/install_kernel.sh)
     # wget -N --no-check-certificate https://github.com/jinwyp/one_click_script/raw/master/install_kernel.sh && chmod +x ./install_kernel.sh && ./install_kernel.sh
 }
 
@@ -2150,6 +2150,8 @@ function installV2ray(){
     if [[ ( $configV2rayVlessMode == "trojan" ) || ( $configV2rayVlessMode == "vlessxtlsws" ) || ( $configV2rayVlessMode == "vlessxtlstrojan" ) ]] ; then
         promptInfoXrayName="xray"
         isXray="yes"
+	configV2rayProtocol="vmess"
+	V2rayUnlockText="\"geosite:netflix\""
     else
         read -p "是否使用Xray内核? 直接回车默认为V2ray内核, 请输入[y/N]:" isV2rayOrXrayInput
         isV2rayOrXrayInput=${isV2rayOrXrayInput:-n}
@@ -2158,66 +2160,6 @@ function installV2ray(){
             promptInfoXrayName="xray"
             isXray="yes"
         fi
-    fi
-
-
-    if [[ -n "$configV2rayVlessMode" ]]; then
-         configV2rayProtocol="vless"
-    else 
-
-        echo
-        read -p "是否使用VLESS协议? 直接回车默认为VMess协议, 请输入[y/N]:" isV2rayUseVLessInput
-        isV2rayUseVLessInput=${isV2rayUseVLessInput:-n}
-
-        if [[ $isV2rayUseVLessInput == [Yy] ]]; then
-            configV2rayProtocol="vless"
-        else
-            configV2rayProtocol="vmess"
-        fi
-
-    fi
-
-    echo
-    green " =================================================="
-    yellow " 是否使用 IPv6 解锁流媒体和避免弹出 Google reCAPTCHA 人机验证, 请选择:"
-    red " 解锁需要先安装好 Wireguard 与 Cloudflare Warp, 可用本脚本第1项安装"
-    echo
-    green " 1. 不解锁"
-    green " 2. 避免弹出 Google reCAPTCHA 人机验证"
-    green " 3. 解锁 Netflex 限制"
-    green " 4. 解锁 Youtube 和 Youtube Premium"
-    green " 5. 解锁 全部流媒体 包括 Netflex, Youtube, Hulu, HBO, Disney, BBC, Fox, niconico 等"
-    green " 11. 同时解锁 2 和 3 项,  即为 避免弹出 Google reCAPTCHA 人机验证 和 解锁 Netflex 限制"
-    green " 12. 同时解锁 2 和 3 和 4 项, 即为 避免弹出 Google reCAPTCHA 人机验证 和 解锁 Netflex 和 Youtube 限制"
-    green " 13. 同时解锁 全部流媒体 和 避免弹出 Google reCAPTCHA 人机验证"
-    echo
-    read -p "请输入解锁选项? 直接回车默认选1 不解锁, 请输入纯数字:" isV2rayUnlockGoogleInput
-    isV2rayUnlockGoogleInput=${isV2rayUnlockGoogleInput:-1}
-
-    V2rayUnlockText=""
-
-    if [[ $isV2rayUnlockGoogleInput == "2" ]]; then
-        V2rayUnlockText="\"geosite:google\""
-
-    elif [[ $isV2rayUnlockGoogleInput == "3" ]]; then
-        V2rayUnlockText="\"geosite:netflix\""
-        
-    elif [[ $isV2rayUnlockGoogleInput == "4" ]]; then
-        V2rayUnlockText="\"geosite:youtube\""
-
-    elif [[ $isV2rayUnlockGoogleInput == "5" ]]; then
-        V2rayUnlockText="\"geosite:netflix\", \"geosite:youtube\", \"geosite:bahamut\", \"geosite:hulu\", \"geosite:hbo\", \"geosite:disney\", \"geosite:bbc\", \"geosite:4chan\", \"geosite:fox\", \"geosite:abema\", \"geosite:dmm\", \"geosite:niconico\", \"geosite:pixiv\", \"geosite:viu\""
-
-    elif [[ $isV2rayUnlockGoogleInput == "11" ]]; then
-        V2rayUnlockText="\"geosite:google\", \"geosite:netflix\""
-
-    elif [[ $isV2rayUnlockGoogleInput == "12" ]]; then
-        V2rayUnlockText="\"geosite:google\", \"geosite:netflix\", \"geosite:youtube\""
-
-    elif [[ $isV2rayUnlockGoogleInput == "13" ]]; then
-        V2rayUnlockText="\"geosite:google\", \"geosite:netflix\", \"geosite:youtube\", \"geosite:bahamut\", \"geosite:hulu\", \"geosite:hbo\", \"geosite:disney\", \"geosite:bbc\", \"geosite:4chan\", \"geosite:fox\", \"geosite:abema\", \"geosite:dmm\", \"geosite:niconico\", \"geosite:pixiv\", \"geosite:viu\""
-    else
-        V2rayUnlockText=""
     fi
 
 
@@ -4478,6 +4420,12 @@ function start_menu(){
         getLinuxOSRelease
         installSoftDownload
     fi
+    setLinuxDateZone
+    sleep 3s
+
+    installWireguard
+    configV2rayVlessMode="vlessxtlstrojan"
+    installTrojanV2rayWithNginx "v2ray"
 
     green " ===================================================================================================="
     green " Trojan Trojan-go V2ray 一键安装脚本 | 2021-04-15 | By jinwyp | 系统支持：centos7+ / debian9+ / ubuntu16.04+"
