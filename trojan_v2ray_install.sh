@@ -4567,7 +4567,8 @@ function enableBBRSysctlConfig(){
     else
     	sysctl -p
     fi
-start_menu
+    sleep 2s
+    start_menu
 }
 
 # 卸载 bbr+锐速 配置
@@ -4628,6 +4629,7 @@ function addOptimizingSystemConfig(){
         echo
         sysctl -p
         echo
+        sleep 2s
         start_menu
     fi
 
@@ -4674,7 +4676,8 @@ EOF
     echo
     green " 已完成 系统网络配置的优化 "
     echo
-start_menu
+    sleep 2s
+    start_menu
 }
 
 
@@ -5796,6 +5799,7 @@ function installWireguard(){
     if [[ "${osRelease}" == "debian" || "${osRelease}" == "ubuntu" ]]; then
             ${sudoCmd} apt-get update
             ${sudoCmd} apt install -y openresolv
+	    ${sudoCmd} apt install -y curl
             # ${sudoCmd} apt install -y resolvconf
             ${sudoCmd} apt install net-tools iproute2 dnsutils
             echo
@@ -6491,6 +6495,7 @@ function start_menu(){
          linuxKernelToInstallVersion="5.10"
          linuxKernelToBBRType="bbrplus"
          installKernel
+	 sleep 2s
     fi
     
     read -p "是否开启bbrplus? 请输入[Y/n]:" osTimezoneInput
@@ -6499,6 +6504,7 @@ function start_menu(){
     if [[ $osTimezoneInput == [Yy] ]]; then
           #开启bbrplus
           enableBBRSysctlConfig "bbrplus"
+	  sleep 2s
     fi
 
     read -p "是否安装Wireguard? 请输入[Y/n]:" osTimezoneInput
@@ -6507,6 +6513,7 @@ function start_menu(){
     if [[ $osTimezoneInput == [Yy] ]]; then
           #安装Wireguard
           installWireguard
+	  sleep 2s
     fi 
 
     read -p "是否安装xray? 请输入[Y/n]:" osTimezoneInput
