@@ -1348,7 +1348,8 @@ function installTrojanV2rayWithNginx(){
     stopServiceNginx
     testLinuxPortUsage
     installPackage
-
+    setLinuxDateZone
+    
     green " ================================================== "
     yellow " 请输入绑定到本VPS的域名 例如www.xxx.com: (此步骤请关闭CDN后安装)"
     if [[ $1 == "repair" ]] ; then
@@ -6514,14 +6515,6 @@ function start_menu(){
     if [[ $osTimezoneInput == [Yy] ]]; then
           configV2rayVlessMode="vlessxtlstrojan"
           installTrojanV2rayWithNginx "v2ray"
-    fi 
-
-    read -p "是否设置北京时间? 请输入[Y/n]:" osTimezoneInput
-    osTimezoneInput=${osTimezoneInput:-Y}
-
-    if [[ $osTimezoneInput == [Yy] ]]; then
-          setLinuxDateZone
-          sleep 3s
     fi 
 
 }
