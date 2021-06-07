@@ -4627,7 +4627,7 @@ function addOptimizingSystemConfig(){
         echo
         sysctl -p
         echo
-        exit
+        start_menu
     fi
 
     removeOptimizingSystemConfig
