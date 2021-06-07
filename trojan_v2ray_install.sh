@@ -6533,8 +6533,9 @@ function start_menu(){
     if [[ $osTimezoneInput == [Yy] ]]; then
           configV2rayVlessMode="vlessxtlstrojan"
           installTrojanV2rayWithNginx "v2ray"
+          sleep 2s
     fi 
 
 }
 
-
+start_menu
