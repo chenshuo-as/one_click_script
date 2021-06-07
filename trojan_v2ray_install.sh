@@ -4566,7 +4566,7 @@ function enableBBRSysctlConfig(){
     else
     	sysctl -p
     fi
-
+start_menu()
 }
 
 # 卸载 bbr+锐速 配置
@@ -4673,7 +4673,7 @@ EOF
     echo
     green " 已完成 系统网络配置的优化 "
     echo
-
+start_menu()
 }
 
 
