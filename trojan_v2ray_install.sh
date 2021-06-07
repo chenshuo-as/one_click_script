@@ -380,17 +380,12 @@ function setLinuxDateZone(){
         green " =================================================="
         # read 默认值 https://stackoverflow.com/questions/2642585/read-a-variable-in-bash-with-a-default-value
 
-        read -p "是否设置为北京时间 +0800 时区? 请输入[Y/n]:" osTimezoneInput
-        osTimezoneInput=${osTimezoneInput:-Y}
+        if [[ -f /etc/localtime ]] && [[ -f /usr/share/zoneinfo/Asia/Shanghai ]];  then
+              mv /etc/localtime /etc/localtime.bak
+              cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
-        if [[ $osTimezoneInput == [Yy] ]]; then
-            if [[ -f /etc/localtime ]] && [[ -f /usr/share/zoneinfo/Asia/Shanghai ]];  then
-                mv /etc/localtime /etc/localtime.bak
-                cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-
-                yellow "设置成功! 当前时区已设置为 $(date -R)"
-                green " =================================================="
-            fi
+              yellow "设置成功! 当前时区已设置为 $(date -R)"
+              green " =================================================="
         fi
 
     fi
@@ -4423,7 +4418,13 @@ function start_menu(){
     setLinuxDateZone
     sleep 3s
 
-    installWireguard
+    read -p "是否替换内核安装bbrplus? 请输入[Y/n]:" osTimezoneInput
+    osTimezoneInput=${osTimezoneInput:-Y}
+
+    if [[ $osTimezoneInput == [Yy] ]]; then
+         installWireguard
+    fi
+
     configV2rayVlessMode="vlessxtlstrojan"
     installTrojanV2rayWithNginx "v2ray"
 
