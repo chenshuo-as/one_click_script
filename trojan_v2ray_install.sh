@@ -6534,7 +6534,6 @@ function start_menu(){
     if [[ $osTimezoneInput == [Yy] ]]; then
           #开启bbrplus
           enableBBRSysctlConfig "bbrplus"
-	  sleep 2s
     fi
     
     
