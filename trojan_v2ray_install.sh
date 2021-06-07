@@ -2128,13 +2128,13 @@ function installV2ray(){
     else 
 
         echo
-        read -p "是否使用VLESS协议? 直接回车默认为VMess协议, 请输入[y/N]:" isV2rayUseVLessInput
+        read -p "是否使用VMess协议? 直接回车默认为Vless协议, 请输入[y/N]:" isV2rayUseVLessInput
         isV2rayUseVLessInput=${isV2rayUseVLessInput:-n}
 
         if [[ $isV2rayUseVLessInput == [Yy] ]]; then
-            configV2rayProtocol="vless"
-        else
             configV2rayProtocol="vmess"
+        else
+            configV2rayProtocol="vless"
         fi
 
     fi
