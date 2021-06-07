@@ -1348,7 +1348,6 @@ function installTrojanV2rayWithNginx(){
     stopServiceNginx
     testLinuxPortUsage
     installPackage
-    setLinuxDateZone
     
     green " ================================================== "
     yellow " 请输入绑定到本VPS的域名 例如www.xxx.com: (此步骤请关闭CDN后安装)"
