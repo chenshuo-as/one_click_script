@@ -188,39 +188,6 @@ function testLinuxPortUsage(){
         exit 1
     fi
 
-    osSELINUXCheck=$(grep SELINUX= /etc/selinux/config | grep -v "#")
-    if [ "$osSELINUXCheck" == "SELINUX=enforcing" ]; then
-        red "======================================================================="
-        red "检测到SELinux为开启强制模式状态，为防止申请证书失败，请先重启VPS后，再执行本脚本"
-        red "======================================================================="
-        read -p "是否现在重启? 请输入 [Y/n] :" osSELINUXCheckIsRebootInput
-        [ -z "${osSELINUXCheckIsRebootInput}" ] && osSELINUXCheckIsRebootInput="y"
-
-        if [[ $osSELINUXCheckIsRebootInput == [Yy] ]]; then
-            sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
-            setenforce 0
-            echo -e "VPS 重启中..."
-            reboot
-        fi
-        exit
-    fi
-
-    if [ "$osSELINUXCheck" == "SELINUX=permissive" ]; then
-        red "======================================================================="
-        red "检测到SELinux为宽容模式状态，为防止申请证书失败，请先重启VPS后，再执行本脚本"
-        red "======================================================================="
-        read -p "是否现在重启? 请输入 [Y/n] :" osSELINUXCheckIsRebootInput
-        [ -z "${osSELINUXCheckIsRebootInput}" ] && osSELINUXCheckIsRebootInput="y"
-
-        if [[ $osSELINUXCheckIsRebootInput == [Yy] ]]; then
-            sed -i 's/SELINUX=permissive/SELINUX=disabled/g' /etc/selinux/config
-            setenforce 0
-            echo -e "VPS 重启中..."
-            reboot
-        fi
-        exit
-    fi
-
     if [ "$osRelease" == "centos" ]; then
         if  [[ ${osReleaseVersionNo} == "6" || ${osReleaseVersionNo} == "5" ]]; then
             green " =================================================="
