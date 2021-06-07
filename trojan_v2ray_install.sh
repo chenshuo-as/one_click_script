@@ -6479,12 +6479,10 @@ function startMenuOther(){
 
 
 function start_menu(){
-    clear
 
-    if [[ $1 == "first" ]] ; then
-        getLinuxOSRelease
-        installSoftDownload
-    fi
+    getLinuxOSRelease
+    installSoftDownload
+
 
     read -p "是否替换内核? 请输入[Y/n]:" osTimezoneInput
     osTimezoneInput=${osTimezoneInput:-Y}
@@ -6525,5 +6523,4 @@ function start_menu(){
 
 }
 
-start_menu "first"
 
