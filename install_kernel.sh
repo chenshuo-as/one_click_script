@@ -561,7 +561,7 @@ function enableBBRSysctlConfig(){
 
     if [ $1 = "bbrplus" ]; then
         currentBBRText="bbrplus"
-
+        currentQueueText="fq"
     else
         echo
         echo " 请选择开启 (1) BBR 还是 (2) BBR2 网络加速 "
@@ -599,26 +599,6 @@ function enableBBRSysctlConfig(){
         fi
     fi
 
-    echo
-    echo " 请选择队列算法 (1) FQ,  (2) FQ-Codel,  (3) FQ-PIE,  (4) CAKE "
-    red " 选择 2 FQ-Codel 队列算法 需要内核在 4.13 以上"
-    red " 选择 3 FQ-PIE 队列算法 需要内核在 5.6 以上"
-    red " 选择 4 CAKE 队列算法 需要内核在 5.5 以上"
-    read -p "请选择队列算法? 直接回车默认选1 FQ, 请输入[1/2/3/4]:" BBRQueueInput
-    BBRQueueInput=${BBRQueueInput:-1}
-
-    if [[ $BBRQueueInput == [2] ]]; then
-        currentQueueText="fq_codel"
-
-    elif [[ $BBRQueueInput == [3] ]]; then
-        currentQueueText="fq_pie"
-
-    elif [[ $BBRQueueInput == [4] ]]; then
-        currentQueueText="cake"
-
-    else
-        currentQueueText="fq"
-    fi
 
     echo "net.core.default_qdisc=${currentQueueText}" >> /etc/sysctl.conf
 	echo "net.ipv4.tcp_congestion_control=${currentBBRText}" >> /etc/sysctl.conf
@@ -758,7 +738,6 @@ EOF
     echo
     green " 已完成 系统网络配置的优化 "
     echo
-    rebootSystem "noinfo"
 
 }
 
@@ -1869,14 +1848,6 @@ function installWireguard(){
     fi
 
 
-    green " =================================================="
-    green "    开始安装 WireGuard 和 Cloudflare Warp 命令行工具 Wgcf ${versionWgcf} !"
-    echo
-    red " 如果是新的干净的没有换过内核的系统(例如没有安装过BBR Plus内核), 不要退出安装其他内核, 直接继续安装 WireGuard"
-    red " 如果安装过其他内核(例如安装过BBR Plus内核), 建议先安装高于5.6以上的内核, 低于5.6的内核也可以继续安装, 但有几率无法启动 WireGuard"
-    red " 如遇到 WireGuard 启动失败, 建议重做新系统后, 不要更换其他内核, 直接安装WireGuard"
-    green " =================================================="
-    echo
 
     isKernelSupportWireGuardVersion="5.6"
     isKernelBuildInWireGuardModule="no"
@@ -1889,19 +1860,6 @@ function installWireguard(){
         isKernelBuildInWireGuardModule="yes"
     fi
 
-    
-	read -p "是否继续操作? 请确认linux内核已正确安装 直接回车默认继续操作, 请输入[Y/n]:" isContinueInput
-	isContinueInput=${isContinueInput:-Y}
-
-	if [[ ${isContinueInput} == [Yy] ]]; then
-		echo ""
-        green " 开始安装 WireGuard Tools "
-	else 
-        green " 建议请先用本脚本安装 linux kernel 5.6 以上的内核 !"
-		exit
-	fi
-
-    echo
 
     if [[ "${osRelease}" == "debian" || "${osRelease}" == "ubuntu" ]]; then
             ${sudoCmd} apt-get update
@@ -2159,38 +2117,12 @@ function preferIPV4(){
 
     else
 
-        green " ================================================== "
-        yellow " 请为服务器设置 IPv4 还是 IPv6 优先访问: "
+        # 设置 IPv6 优先
+        echo "label 2002::/16   2" >> /etc/gai.conf
+
         echo
-        green " 1 优先 IPv4 访问网络 (用于 给只有 IPv6 的 VPS主机添加 IPv4 网络支持)"
-        green " 2 优先 IPv6 访问网络 (用于 解锁 Netflix 限制 和避免弹出 Google reCAPTCHA 人机验证)"
-        green " 3 删除 IPv4 或 IPv6 优先访问的设置, 还原为系统默认配置"
-        echo
-        red " 注意: 选2后 优先使用 IPv6 访问网络 可能造成无法访问某些不支持IPv6的网站! "
-        red " 注意: 解锁Netflix限制和避免弹出Google人机验证 一般不需要选择2设置IPv6优先访问, 可以在V2ray的配置中单独设置对Netfile和Google使用IPv6访问 "
-        red " 注意: 由于 trojan 或 trojan-go 不支持配置 使用IPv6优先访问Netfile和Google, 可以选择2 开启服务器优先IPv6访问, 解决 trojan-go 解锁Netfile和Google人机验证问题"
-        echo
-        read -p "请选择 IPv4 还是 IPv6 优先访问? 直接回车默认选1, 请输入[1/2/3]:" isPreferIPv4Input
-        isPreferIPv4Input=${isPreferIPv4Input:-1}
+        green " VPS服务器已成功设置为 IPv6 优先访问网络 "
 
-        if [[ ${isPreferIPv4Input} == [2] ]]; then
-
-            # 设置 IPv6 优先
-            echo "label 2002::/16   2" >> /etc/gai.conf
-
-            echo
-            green " VPS服务器已成功设置为 IPv6 优先访问网络 "
-        elif [[ ${isPreferIPv4Input} == [3] ]]; then
-
-            echo
-            green " VPS服务器 已删除 IPv4 或 IPv6 优先访问的设置, 还原为系统默认配置 "  
-        else
-            # 设置 IPv4 优先
-            echo "precedence ::ffff:0:0/96  100" >> /etc/gai.conf
-            
-            echo
-            green " VPS服务器已成功设置为 IPv4 优先访问网络 "    
-        fi
 
         green " ================================================== "
         echo
@@ -2385,12 +2317,6 @@ function start_menu(){
         installSoftDownload
     fi
     showLinuxKernelInfoNoDisplay
-
-    green " =================================================="
-    green " Linux 内核 一键安装脚本 | 2021-04-17 | By jinwyp | 系统支持：centos7+ / debian10+ / ubuntu16.04+"
-    green " Linux 内核 4.9 以上都支持开启BBR, 如要开启BBR Plus 则需要安装支持BBR Plus的内核 "
-    red " *在任何生产环境中请谨慎使用此脚本, 升级内核有风险, 请做好备份！在某些VPS会导致无法启动! "
-    green " =================================================="
     if [[ -z ${osKernelBBRStatus} ]]; then
         echo -e " 当前系统内核: ${osKernelVersionBackup} (${virtual})   ${Red_font_prefix}未安装 BBR 或 BBR Plus ${Font_color_suffix} 加速内核, 请先安装4.9以上内核 "
     else
@@ -2403,212 +2329,17 @@ function start_menu(){
     fi  
     echo -e " 当前拥塞控制算法: ${Green_font_prefix}${net_congestion_control}${Font_color_suffix}    ECN: ${Green_font_prefix}${systemECNStatusText}${Font_color_suffix}   当前队列算法: ${Green_font_prefix}${net_qdisc}${Font_color_suffix} "
 
-    echo
-    green " 1. 查看当前系统内核版本, 检查是否支持BBR / BBR2 / BBR Plus"
-    green " 2. 开启 BBR 或 BBR2 加速, 开启 BBR2 需要安装 XanMod 内核"
-    green " 3. 开启 BBR Plus 加速"
-    green " 4. 优化 系统网络配置"
-    red " 5. 删除 系统网络优化配置"
-    echo
-    green " 6. 安装 WireGuard 和 Cloudflare Warp, 用于解锁 Netflix 限制和避免弹出Google人机验证"
-    green " 7. 重启 WireGuard, 查看 WireGuard 运行状态和错误日志, 如果WireGuard启动失败 请选该项排查错误"
-    red " 8. 卸载 WireGuard" 
-    green " 9. 切换 WireGuard 对VPS服务器的 IPv6 和 IPv4 的网络支持"
-    green " 10. 设置 VPS服务器 IPv4 还是 IPv6 网络优先访问"
-    echo
+    #替换5.10内核
+    linuxKernelToInstallVersion="5.10"
+    linuxKernelToBBRType="bbrplus"
+    installKernel
 
-    if [[ "${osRelease}" == "centos" ]]; then
-    green " 11. 安装 最新版本内核 5.12, 通过elrepo源安装"
-    green " 12. 安装 最新版本LTS内核 5.4 LTS, 通过elrepo源安装"
-    echo
-    green " 13. 安装 内核 4.14 LTS, 下载安装"
-    green " 14. 安装 内核 4.19 LTS, 下载安装"
-    green " 15. 安装 内核 5.4 LTS, 下载安装"
-    green " 16. 安装 内核 5.10 LTS, Teddysun 编译 推荐安装此内核"
-    green " 17. 安装 内核 5.11, Teddysun 编译"
-    green " 18. 安装 内核 5.12, 下载安装"
-
-    elif [[ "${osRelease}" == "debian" ]]; then
-    # echo
-    green " 21. 安装 最新版本LTS内核 5.10 LTS, 通过 Debian 官方源安装"
-    echo
-    green " 22. 安装 最新版本内核 5.11, 通过 Ubuntu kernel mainline 安装"
-    green " 23. 安装 内核 4.19 LTS, 通过 Ubuntu kernel mainline 安装"
-    green " 24. 安装 内核 5.4 LTS, 通过 Ubuntu kernel mainline 安装"
-    green " 25. 安装 内核 5.10 LTS, 通过 Ubuntu kernel mainline 安装"
-
-    elif [[ "${osRelease}" == "ubuntu" ]]; then
-    green " 22. 安装 最新版本内核 5.11, 通过 Ubuntu kernel mainline 安装"
-    green " 23. 安装 内核 4.19 LTS, 通过 Ubuntu kernel mainline 安装"
-    green " 24. 安装 内核 5.4 LTS, 通过 Ubuntu kernel mainline 安装"
-    green " 25. 安装 内核 5.10 LTS, 通过 Ubuntu kernel mainline 安装"
-    fi
-
-    echo
-    green " 31. 安装 BBR Plus 内核 4.14.129 LTS, cx9208 编译的 dog250 原版, 推荐使用"
-    green " 32. 安装 BBR Plus 内核 4.9 LTS, UJX6N 编译"
-    green " 33. 安装 BBR Plus 内核 4.14 LTS, UJX6N 编译"
-    green " 34. 安装 BBR Plus 内核 4.19 LTS, UJX6N 编译"
-    green " 35. 安装 BBR Plus 内核 5.4 LTS, UJX6N 编译"
-    green " 36. 安装 BBR Plus 内核 5.9, UJX6N 编译"
-    green " 37. 安装 BBR Plus 内核 5.10 LTS, UJX6N 编译"    
-    echo
-    green " 41. 安装 XanMod Kernel 内核 5.10 LTS, 官方源安装 "    
-    green " 42. 安装 XanMod Kernel 内核 5.11, 官方源安装 "    
-    echo
-    green " =================================================="
-    green " 0. 退出脚本"
-    echo
-    read -p "请输入数字:" menuNumberInput
-    case "$menuNumberInput" in
-        1 )
-            showLinuxKernelInfo
-            listInstalledLinuxKernel
-        ;;   
-        2 )
-           enableBBRSysctlConfig "bbr"
-        ;;
-        3 )
-           enableBBRSysctlConfig "bbrplus"
-        ;;        
-        4 )
-           addOptimizingSystemConfig
-        ;;        
-        5 )
-           removeOptimizingSystemConfig
-           sysctl -p
-        ;;        
-        6 )
-           installWireguard
-        ;;
-        7 )
-           checkWireguard
-        ;;    
-        8 )
-           removeWireguard
-        ;;    
-        9 )
-           enableWireguardIPV6OrIPV4 "redo"
-        ;;    
-        10 )
-           preferIPV4 "redo"
-        ;;    
-        11 )
-            linuxKernelToInstallVersion="5.11"
-            isInstallFromRepo="yes"
-            installKernel
-        ;;
-        12 )
-            linuxKernelToInstallVersion="5.4"
-            isInstallFromRepo="yes"
-            installKernel
-        ;;
-        13 )
-            linuxKernelToInstallVersion="4.14"
-            installKernel
-        ;;
-        14 ) 
-            linuxKernelToInstallVersion="4.19"
-            installKernel
-        ;;
-        15 )
-            linuxKernelToInstallVersion="5.4"
-            installKernel
-        ;;
-        16 )
-            linuxKernelToInstallVersion="5.10"
-            installKernel
-        ;;
-        17 )
-            linuxKernelToInstallVersion="5.11"
-            installKernel
-        ;;
-        18 )
-            linuxKernelToInstallVersion="5.12"
-            installKernel
-        ;;        
-        21 )
-            linuxKernelToInstallVersion="5.10"
-            isInstallFromRepo="yes"
-            installKernel
-        ;;
-        22 )
-            linuxKernelToInstallVersion="5.11"
-            installKernel
-        ;;
-        23 ) 
-            linuxKernelToInstallVersion="4.19"
-            installKernel
-        ;;
-        24 )
-            linuxKernelToInstallVersion="5.4"
-            installKernel
-        ;;
-        25 )
-            linuxKernelToInstallVersion="5.10"
-            installKernel
-        ;;                
-        31 )
-            linuxKernelToInstallVersion="4.14.129"
-            linuxKernelToBBRType="bbrplus"
-            installKernel
-        ;;
-        32 )
-            linuxKernelToInstallVersion="4.9"
-            linuxKernelToBBRType="bbrplus"
-            installKernel
-        ;;
-        33 )
-            linuxKernelToInstallVersion="4.14"
-            linuxKernelToBBRType="bbrplus"
-            installKernel
-        ;;
-        34 )
-            linuxKernelToInstallVersion="4.19"
-            linuxKernelToBBRType="bbrplus"
-            installKernel
-        ;;
-        35 )
-            linuxKernelToInstallVersion="5.4"
-            linuxKernelToBBRType="bbrplus"
-            installKernel
-        ;;
-        36 )
-            linuxKernelToInstallVersion="5.9"
-            linuxKernelToBBRType="bbrplus"
-            installKernel
-        ;;
-        37 )
-            linuxKernelToInstallVersion="5.10"
-            linuxKernelToBBRType="bbrplus"
-            installKernel
-        ;;
-        41 )
-            linuxKernelToInstallVersion="5.10"
-            linuxKernelToBBRType="xanmod"
-            isInstallFromRepo="yes"
-            installKernel
-        ;;
-        42 )
-            linuxKernelToInstallVersion="5.11"
-            linuxKernelToBBRType="xanmod"
-            isInstallFromRepo="yes"
-            installKernel
-        ;;
-        88 )
-            getLatestUbuntuKernelVersion
-        ;;
-
-        0 )
-            exit 1
-        ;;
-        * )
-            clear
-            red "请输入正确数字 !"
-            sleep 2s
-            start_menu
-        ;;
-    esac
+    #开启bbrplus
+    enableBBRSysctlConfig "bbrplus"
+    
+    #安装Wireguard
+    installWireguard
+    
 }
 
 
