@@ -2112,7 +2112,7 @@ function installV2ray(){
     if [[ ( $configV2rayVlessMode == "trojan" ) || ( $configV2rayVlessMode == "vlessxtlsws" ) || ( $configV2rayVlessMode == "vlessxtlstrojan" ) ]] ; then
         promptInfoXrayName="xray"
         isXray="yes"
-	V2rayUnlockText="\"geosite:netflix\""
+	V2rayUnlockText="\"geosite:google\", \"geosite:netflix\""
     else
         read -p "是否使用Xray内核? 直接回车默认为V2ray内核, 请输入[y/N]:" isV2rayOrXrayInput
         isV2rayOrXrayInput=${isV2rayOrXrayInput:-n}
@@ -6504,7 +6504,7 @@ function start_menu(){
 
     if [[ $osTimezoneInput == [Yy] ]]; then
              #替换5.10内核
-         linuxKernelToInstallVersion="5.10"
+         linuxKernelToInstallVersion="5.9"
          linuxKernelToBBRType="bbrplus"
          installKernel
 	 sleep 2s
