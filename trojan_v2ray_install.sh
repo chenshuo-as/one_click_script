@@ -6547,7 +6547,7 @@ function start_menu(){
 
     if [[ $osTimezoneInput == [Yy] ]]; then
              #替换5.10内核
-         linuxKernelToInstallVersion="5.9"
+         linuxKernelToInstallVersion="5.10"
          linuxKernelToBBRType="bbrplus"
          installKernel
 	 sleep 2s
